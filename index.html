@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#eae4d8">
+<title>The Room Remembers — Room 01</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap');
+:root{--paper:#eae4d8;--ink:#3c514a;--mute:#7f877d;--outline:#c7bdae;--cream:#f6f0e5;--ochre:#bc7b5a;--deep:#425e56}
+*{box-sizing:border-box}html{min-height:100%;background:var(--paper)}body{margin:0;background:radial-gradient(circle at 50% 10%,#f2ecdf,var(--paper) 62%);color:var(--ink);font-family:'DM Sans',system-ui,-apple-system,sans-serif;min-height:100vh;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+main{max-width:1130px;padding:clamp(15px,3vw,30px);margin:0 auto}
+header{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:2px 0 18px}
+.brand h1{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:clamp(25px,3.2vw,38px);letter-spacing:-1.15px;margin:0;line-height:1.08}
+.brand p{font-size:11px;letter-spacing:.21em;font-weight:700;color:#a0715f;margin:9px 0 0}
+.topright{display:flex;align-items:center;gap:8px}.tiny{font-size:11px;color:#767d76;letter-spacing:.08em;white-space:nowrap}
+button{font:inherit;cursor:pointer;color:inherit;touch-action:none}.iconbtn{border:1px solid var(--outline);width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:#f5efe5;transition:transform .12s}.iconbtn:active{transform:scale(.94)}.iconbtn svg{width:16px;height:16px}
+.stage-wrap{position:relative;border:1px solid #acaa9a;border-radius:16px;background:#d5d0bf;box-shadow:0 11px 0 rgba(83,87,76,.09),0 18px 45px rgba(65,75,61,.08);overflow:hidden;line-height:0}
+canvas{display:block;width:100%;aspect-ratio:16/9;background:#e3ddce;touch-action:none}
+.fallback{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:#eee7dc;color:#535e54;font-size:14px;text-align:center;padding:20px;line-height:1.5}
+body.failed .fallback{display:flex}
+.underbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:19px 3px 0;min-height:32px}.roominfo{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:700;letter-spacing:.03em}.rule{height:17px;width:1px;background:#b7b7a8}.muted{font-size:12px;color:var(--mute);font-weight:500}.rightinfo{display:flex;align-items:center;gap:11px}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:14px}.movebuttons{display:grid;grid-template-columns:repeat(3,60px);grid-template-rows:repeat(2,60px);gap:5px;align-items:center;justify-items:center}.arrow{width:60px;height:60px;border-radius:13px;background:#f7f0e4;border:1px solid #c2bcaa;box-shadow:0 4px 0 #c7bdad;display:grid;place-items:center;font-weight:700;transition:transform .1s,box-shadow .1s}.arrow svg{width:19px;height:19px}.arrow:active,.arrow.pressed{transform:translateY(3px);box-shadow:0 1px 0 #c7bdad;background:#e3dccc}.arrow[data-key=up]{grid-column:2;grid-row:1}.arrow[data-key=left]{grid-column:1;grid-row:2}.arrow[data-key=down]{grid-column:2;grid-row:2}.arrow[data-key=right]{grid-column:3;grid-row:2}
+.actionside{display:flex;flex-direction:column;align-items:end;gap:8px}.rewind{display:flex;align-items:center;gap:11px;background:#557166;border:1px solid #405950;color:#fff8ee;border-radius:13px;padding:18px 22px;box-shadow:0 4px 0 #344d43;font-weight:700;letter-spacing:.04em;font-size:13px;white-space:nowrap}.rewind:active{transform:translateY(3px);box-shadow:0 1px 0 #344d43}.rewind svg{width:18px;height:18px}.miniinstr{color:var(--mute);font-size:11px;text-align:right}
+footer{font-size:12px;color:#8b8e83;line-height:1.6;margin:24px 3px 0;display:flex;justify-content:space-between;gap:14px;border-top:1px solid #d6cec1;padding-top:14px}
+#win{position:absolute;inset:0;z-index:4;display:none;align-items:center;justify-content:center;background:#252f28b5;line-height:1.4;padding:18px}#win.visible{display:flex}.winpanel{width:min(88%,420px);background:#f5efe4;border-radius:12px;border:2px solid #d7bf93;box-shadow:0 20px 50px #1a262233;padding:30px;text-align:center}.winpanel .small{color:#9b7560;letter-spacing:.2em;font-size:11px;font-weight:700}.winpanel h2{font-family:'Fraunces',Georgia,serif;color:#40564c;font-size:30px;margin:10px 0}.winpanel p{color:#7a8077;font-size:14px;margin:0 0 20px}.winpanel button{border:0;border-radius:8px;padding:13px 25px;background:#557166;color:white;font-weight:700}
+@media(max-width:600px){main{padding:14px 12px}.brand h1{font-size:27px}.brand p{font-size:9px;letter-spacing:.16em}.tiny{display:none}header{margin-bottom:14px}.stage-wrap{border-radius:12px}canvas{aspect-ratio:1.08}.underbar{margin-top:17px}.controls{margin-top:18px}.movebuttons{grid-template-columns:repeat(3,53px);grid-template-rows:repeat(2,53px)}.arrow{width:53px;height:53px;border-radius:12px}.rewind{padding:16px 18px}.miniinstr{max-width:120px}footer span:last-child{display:none}footer{margin-top:20px}}
+@media(min-width:900px){.movebuttons{grid-template-columns:repeat(3,49px);grid-template-rows:repeat(2,49px)}.arrow{width:49px;height:49px}.controls{margin-top:9px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <div class="brand"><h1>the room remembers<span style="color:#c18a6e">.</span></h1><p>AN ARCHITECTURAL PUZZLE</p></div>
+  <div class="topright"><span class="tiny">A small world, for now</span><button class="iconbtn" id="sound" title="Toggle sound" aria-label="Toggle sound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 5L6 9H2v6h4l5 4V5Z"/><path d="M16 9l5 6m0-6-5 6"/></svg></button><button class="iconbtn" id="fresh" title="Restart room and clear memory" aria-label="Restart and clear memory"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 11a9 9 0 1 1 2 6M3 4v7h7"/></svg></button></div>
+</header>
+<div class="stage-wrap">
+  <canvas id="world" aria-label="Interactive puzzle room. Move with arrow keys or WASD and rewind to leave an echo."></canvas>
+  <div class="fallback" id="fallback">This preview cannot run the game. Open this file from a hosted website in your browser.</div>
+  <div id="win" role="dialog" aria-label="Room completed" aria-modal="true"><div class="winpanel"><div class="small">ROOM 01 COMPLETE</div><h2>Something stayed behind.</h2><p>You found a way through the room.</p><button id="again">Enter again</button></div></div>
+</div>
+<div class="underbar"><div class="roominfo"><span>01 <span style="color:#b8ac9e">/</span> THE ECHO</span><span class="rule"></span><span class="muted" id="attempts">Attempt 01</span></div><div class="rightinfo"><span class="muted" id="history">No echo</span><span id="statusdot" style="width:7px;height:7px;border-radius:50%;background:#b7b0a0"></span></div></div>
+<div class="controls"><div class="movebuttons" aria-label="Move character"><button class="arrow" data-key="up" aria-label="Move up"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5L3 17h18Z"/></svg></button><button class="arrow" data-key="left" aria-label="Move left"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 12l12-9v18Z"/></svg></button><button class="arrow" data-key="down" aria-label="Move down"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 19L3 7h18Z"/></svg></button><button class="arrow" data-key="right" aria-label="Move right"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 12L7 3v18Z"/></svg></button></div><div class="actionside"><button id="rewind" class="rewind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7H2v-5M3 7a9 9 0 1 1-1 5"/></svg>REWIND</button><div class="miniinstr">WASD / arrow keys · R to rewind</div></div></div>
+<footer><span>Prototype 01 · Built to grow one room at a time</span><span>More of the house is waiting.</span></footer>
+</main>
+<script>
+(()=>{'use strict';
+const canvas=document.getElementById('world'),ctx=canvas.getContext('2d'),won=document.getElementById('win');
+if(!ctx){document.body.classList.add('failed');return;}
+const W=960,H=600,FLOOR={x:72,y:92,w:816,h:438},plate={x:412,y:409,r:27},spawn={x:158,y:321},door={x:838,y:286,w:36,h:75};
+let player={...spawn},attempt=1,record=[],echo=[],echoTime=0,echoPt=null,clock=0,last=performance.now(),gateBlend=0,solved=false,soundOn=false,ac=null;
+let renderedOnce=false,scale=1,cameraX=0,cameraY=0,screenW=1,screenH=1,windowWidth=1;
+let sceneTime=0,footstepTimer=0;
+const down={up:false,down:false,left:false,right:false};
+const status={attempts:document.getElementById('attempts'),history:document.getElementById('history'),dot:document.getElementById('statusdot')};
+function tone(freq=400,len=.07,volume=.018){if(!soundOn)return;try{ac ||= new (window.AudioContext||window.webkitAudioContext)();const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,ac.currentTime);gain.gain.setValueAtTime(volume,ac.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+len);osc.connect(gain).connect(ac.destination);osc.start();osc.stop(ac.currentTime+len)}catch(_){}}
+function resetMemory(){attempt=1;record=[];echo=[];echoPt=null;echoTime=0;clock=0;gateBlend=0;player={...spawn};solved=false;won.classList.remove('visible');refresh();tone(240,.09)}
+function refresh(){status.attempts.textContent='Attempt '+String(attempt).padStart(2,'0');status.history.textContent=echo.length?'1 echo remembered':'No echo';status.dot.style.background=echo.length?'#c58a65':'#b7b0a0';}
+function rewind(){if(solved)return;if(record.length>=3){echo=record.map(p=>({...p}));echoTime=0;echoPt={x:spawn.x,y:spawn.y};}attempt++;record=[];clock=0;player={...spawn};gateBlend=0;refresh();tone(280,.14)}
+function finish(){if(solved)return;solved=true;try{localStorage.setItem('trr-room01-solved','1')}catch(_){/* in-app previews may block storage */}won.classList.add('visible');tone(620,.18);setTimeout(()=>tone(790,.2),100)}
+// Room collisions are fixed, so echoes cannot accidentally create unsolvable geometry.
+const fixedObstacles=[{x:286,y:166,w:48,h:48},{x:520,y:404,w:58,h:48}];
+function hitRect(x,y,r,ob){const nearestX=Math.max(ob.x,Math.min(x,ob.x+ob.w)),nearestY=Math.max(ob.y,Math.min(y,ob.y+ob.h));return Math.hypot(x-nearestX,y-nearestY)<r}
+function canStand(x,y){const rad=13;if(x<FLOOR.x+rad+5||y<FLOOR.y+rad+5||x>FLOOR.x+FLOOR.w-rad-5||y>FLOOR.y+FLOOR.h-rad-5)return false;
+for(const o of fixedObstacles)if(hitRect(x,y,rad,o))return false;
+// The center wall has a gated opening. When open, the gate stays traversable.
+if(x>620-rad&&x<646+rad){if(y<269+rad||y>351-rad)return false;if(!platePressed())return false;}
+return true;}
+function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
+function platePressed(){return distance(player,plate)<plate.r+6 || !!(echoPt && distance(echoPt,plate)<plate.r+6)}
+function updateEcho(dt){if(!echo.length)return;echoTime+=dt;if(echoTime<=echo[0].t){echoPt={x:echo[0].x,y:echo[0].y};return}if(echoTime>=echo[echo.length-1].t){echoPt={x:echo[echo.length-1].x,y:echo[echo.length-1].y};return}let l=0,r=echo.length-1;while(l+1<r){let m=(l+r)>>1;if(echo[m].t<=echoTime)l=m;else r=m}let a=echo[l],b=echo[r],fraction=(echoTime-a.t)/(b.t-a.t||1);echoPt={x:a.x+(b.x-a.x)*fraction,y:a.y+(b.y-a.y)*fraction};}
+function update(dt){sceneTime+=dt;if(solved)return;clock+=dt;updateEcho(dt);let dx=(down.right?1:0)-(down.left?1:0),dy=(down.down?1:0)-(down.up?1:0);let d=Math.hypot(dx,dy);if(d){dx/=d;dy/=d;const delta=205*dt;if(canStand(player.x+dx*delta,player.y))player.x+=dx*delta;if(canStand(player.x,player.y+dy*delta))player.y+=dy*delta;footstepTimer+=dt;if(footstepTimer>.3){tone(100,.02,.006);footstepTimer=0;}}
+if(record.length===0||clock-record[record.length-1].t>.045){if(record.length<1500)record.push({t:clock,x:player.x,y:player.y});}
+let target=platePressed()?1:0;gateBlend+=(target-gateBlend)*Math.min(1,dt*10);if(player.x>815&&player.y>271&&player.y<377)finish();}
+function rndRect(x,y,w,h,r,fill){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill()}
+function line(x1,y1,x2,y2,color,width=1){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
+function poly(points,color){ctx.beginPath();ctx.moveTo(...points[0]);for(let i=1;i<points.length;i++)ctx.lineTo(...points[i]);ctx.closePath();ctx.fillStyle=color;ctx.fill()}
+function circle(x,y,r,color){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
+function text(t,x,y,font,color,align='left'){ctx.fillStyle=color;ctx.font=font;ctx.textAlign=align;ctx.fillText(t,x,y)}
+function furnishings(){
+// Worn rug and an alcove bookcase: organic material cues, never hazard colors.
+ctx.save();ctx.globalAlpha=.55;rndRect(167,255,175,139,8,'#cfc0ac');rndRect(175,263,158,123,6,'#e6d9c7');ctx.strokeStyle='#cbb5a0';ctx.lineWidth=2;ctx.strokeRect(189,275,132,101);ctx.restore();
+// Planters are physical obstacles.
+for(const o of fixedObstacles){rndRect(o.x+6,o.y+11,o.w,o.h,8,'#685b4933');rndRect(o.x,o.y,o.w,o.h,7,'#b99b7e');rndRect(o.x+6,o.y+6,o.w-12,o.h-12,6,'#7d8571');circle(o.x+o.w*.35,o.y+o.h*.4,13,'#a1a990');circle(o.x+o.w*.65,o.y+o.h*.5,15,'#88967c');circle(o.x+o.w*.5,o.y+o.h*.6,13,'#6d8774')}
+// Windows with warm light casting diagonal planes.
+for(let x of [188,464,730]){rndRect(x,84,84,11,3,'#907c68');rndRect(x+5,82,74,9,2,'#ded6c7');poly([[x+9,96],[x+75,96],[x+117,155],[x-15,155]],'rgba(245,229,191,.20)');line(x+42,90,x+42,102,'#aa9681',3)}
+// Sconces in the wall.
+for(const y of [196,430]){circle(650,y,15,'rgba(235,207,158,.12)');rndRect(650,y-9,9,18,2,'#ba9268');circle(654,y-3,4,'#f2d3a2')}
+}
+function room(){
+ctx.fillStyle='#e7e0d3';ctx.fillRect(0,0,W,H);
+// Walls and soft shadow around the architectural floor.
+rndRect(60,83,844,458,12,'#b7b3a5');rndRect(70,90,821,440,5,'#d5d0bf');rndRect(FLOOR.x,FLOOR.y,FLOOR.w,FLOOR.h,3,'#ece6d8');
+// Matte stone slab joints, deliberately not a coder grid.
+ctx.strokeStyle='#cfcabc';ctx.lineWidth=.8;ctx.globalAlpha=.22;for(let y=110;y<524;y+=74)line(77,y,884,y,'#bdb9aa',.9);for(let x=111;x<870;x+=98)line(x,95,x,528,'#bdb9aa',.9);ctx.globalAlpha=1;
+// Upper architectural wall, plinth and a narrow west doorway.
+rndRect(64,74,831,26,2,'#6d8076');rndRect(73,96,816,6,2,'#a4ada1');rndRect(64,528,831,23,2,'#6d8076');line(75,531,886,531,'#aab1a4',4);
+rndRect(58,82,22,464,3,'#63786e');rndRect(885,82,22,464,3,'#63786e');
+// Dividing wall and the gate's stone arch.
+rndRect(619,96,29,171,3,'#77867b');rndRect(619,353,29,177,3,'#77867b');rndRect(613,259,41,14,2,'#586c62');rndRect(613,347,41,13,2,'#586c62');
+for(let y=111;y<247;y+=30)line(623,y,644,y,'#9dac9d',1.5);for(let y=376;y<517;y+=31)line(623,y,644,y,'#9dac9d',1.5);
+// Gate retracts as weight is placed on the floor plate.
+if(gateBlend<.995){ctx.save();ctx.globalAlpha=Math.max(0,1-gateBlend);rndRect(625,271,17,77,1,'#78644e');for(let y=280;y<342;y+=14)line(626,y,640,y,'#d3b08b',2);ctx.restore()}
+// Room decoration.
+furnishings();
+// Pressure plate has no hint text; it can be learned by observation.
+circle(plate.x,plate.y+4,41,'#00000013');circle(plate.x,plate.y,37,platePressed()?'#8a9c83':'#c8bcb0');circle(plate.x,plate.y,30,platePressed()?'#b1c8a8':'#ddd3c3');circle(plate.x,plate.y,23,platePressed()?'#d8e5d0':'#e8dfd0');ctx.strokeStyle=platePressed()?'#6c8c77':'#b19f8e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(plate.x,plate.y,15,0,Math.PI*2);ctx.stroke();for(let i=0;i<4;i++){let a=i*Math.PI/2;circle(plate.x+17*Math.cos(a),plate.y+17*Math.sin(a),3,platePressed()?'#86a28e':'#b19f8e')}
+// The door is an honest, recognizable wooden door with frame and panels.
+rndRect(817,270,71,119,7,'rgba(48,39,29,.18)');rndRect(821,267,62,114,5,'#725747');rndRect(828,276,49,103,3,'#b68a63');rndRect(834,281,37,91,1,'#7e5b45');rndRect(838,285,29,37,1,'#c69a71');rndRect(838,328,29,37,1,'#bd9069');line(840,288,865,288,'#e6b68b',1);line(840,332,865,332,'#e4b48c',1);circle(861,324,3,'#e6c78c');rndRect(820,379,65,5,2,'#d5b28a');
+// Memory across attempts becomes physical traces.
+if(echo.length){ctx.save();ctx.globalAlpha=.3;for(let i=0;i<echo.length;i+=Math.max(6,Math.floor(echo.length/45))){const p=echo[i];circle(p.x,p.y+11,4,'#9d8e7e')}ctx.restore()}
+// Lit gate effect, restrained, and only after genuine activation.
+if(gateBlend>.05){ctx.save();ctx.globalAlpha=gateBlend*.45;line(621,276,621,346,'#8caa96',5);ctx.restore()}
+// Miniature exit-side floor inlay.
+line(700,310,797,310,'#cab9a4',1.5);
+}
+function character(pos,ghost=false){if(!pos)return;ctx.save();if(ghost)ctx.globalAlpha=.43;
+const x=pos.x,y=pos.y,step=(!ghost&&(down.left||down.right||down.up||down.down))?Math.sin(sceneTime*17)*2:0;
+circle(x,y+13,14,ghost?'#b08977':'#333a3423');
+// Feet, clothing, face, soft outline, hair.
+rndRect(x-10,y+1+step,8,16,3,ghost?'#a3776b':'#334f49');rndRect(x+2,y+1-step,8,16,3,ghost?'#a3776b':'#334f49');rndRect(x-13,y-19+step,26,26,8,ghost?'#a87e70':'#c27e64');rndRect(x-9,y-15+step,18,19,7,ghost?'#bf9380':'#53766d');circle(x,y-23+step,11,ghost?'#ba9180':'#dfb28c');ctx.fillStyle=ghost?'#967b73':'#514d3f';ctx.beginPath();ctx.arc(x,y-25+step,11,Math.PI*1.08,Math.PI*1.96);ctx.lineTo(x+10,y-27+step);ctx.fill();circle(x+4,y-22+step,1.35,ghost?'#a68478':'#594739');ctx.restore()}
+function draw(){let cssWidth=canvas.getBoundingClientRect().width||960,cssHeight=canvas.getBoundingClientRect().height||540;
+const dpr=Math.min(2,window.devicePixelRatio||1);let wp=Math.round(cssWidth*dpr),hp=Math.round(cssHeight*dpr);if(canvas.width!==wp||canvas.height!==hp){canvas.width=wp;canvas.height=hp;}
+screenW=cssWidth;screenH=cssHeight;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssWidth,cssHeight);
+const base=Math.min(cssWidth/W,cssHeight/H),mobile=cssWidth<620;scale=mobile?Math.max(base,cssWidth/675):base;
+let viewW=cssWidth/scale,viewH=cssHeight/scale;
+cameraX=viewW>=W?(W-viewW)/2:Math.max(0,Math.min(W-viewW,player.x-viewW*.43));
+cameraY=viewH>=H?(H-viewH)/2:Math.max(0,Math.min(H-viewH,player.y-viewH*.55));
+ctx.save();ctx.translate(-cameraX*scale,-cameraY*scale);ctx.scale(scale,scale);room();if(echoPt)character(echoPt,true);character(player);ctx.restore();
+if(!renderedOnce){renderedOnce=true;document.getElementById('fallback').remove();}
+}
+function loop(now){const dt=Math.min((now-last)/1000,.04);last=now;update(dt);draw();requestAnimationFrame(loop)}
+const keymap={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
+window.addEventListener('keydown',e=>{const k=keymap[e.key];if(k){down[k]=true;e.preventDefault()}if((e.key==='r'||e.key==='R')&&!e.repeat){rewind();e.preventDefault()}});
+window.addEventListener('keyup',e=>{const k=keymap[e.key];if(k){down[k]=false;e.preventDefault()}});
+window.addEventListener('blur',()=>Object.keys(down).forEach(k=>down[k]=false));
+for(const el of document.querySelectorAll('.arrow')){let direction=el.dataset.key;function release(e){down[direction]=false;el.classList.remove('pressed');if(e&&el.hasPointerCapture?.(e.pointerId))el.releasePointerCapture(e.pointerId)}el.addEventListener('pointerdown',e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(_){/* synthetic test events lack capture */}down[direction]=true;el.classList.add('pressed')});el.addEventListener('pointerup',release);el.addEventListener('pointercancel',release);el.addEventListener('lostpointercapture',release);}
+document.getElementById('rewind').addEventListener('click',rewind);
+document.getElementById('fresh').addEventListener('click',resetMemory);
+document.getElementById('again').addEventListener('click',resetMemory);
+document.getElementById('sound').addEventListener('click',()=>{soundOn=!soundOn;document.getElementById('sound').style.background=soundOn?'#dce6d9':'#f5efe5';tone(500)});
+// Diagnostic exports for scripted QA only.
+window.__TRR_DIAG__={getState:()=>({player:{...player},attempt,echoLength:echo.length,echoPosition:echoPt?{...echoPt}:null,pressed:platePressed(),gateBlend,solved,clock,recordLength:record.length}),setPlayer:(x,y)=>{player.x=x;player.y=y},rewind,reset:resetMemory};
+refresh();record.push({t:0,x:spawn.x,y:spawn.y});requestAnimationFrame(loop);
+})();
+</script>
+<noscript><style>.fallback{display:flex}</style></noscript>
+</body>
+</html>
