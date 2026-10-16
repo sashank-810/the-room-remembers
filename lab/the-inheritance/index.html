@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ede8dd">
+<title>The Room Remembers — The Inheritance (Challenge Preview)</title>
+<style>
+:root{--paper:#ede8dd;--ink:#33473e;--muted:#8a8579;--sand:#f8f4eb;--border:#c8c4b5;--sage:#627e70;--clay:#b6775a;--dark:#283c35}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;overscroll-behavior:none}button{font:inherit;cursor:pointer;touch-action:manipulation}button:focus-visible{outline:3px solid #bc8d59;outline-offset:3px}
+main{max-width:1140px;margin:0 auto;padding:21px 22px 30px}header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:19px}.mark{font-family:Georgia,serif;font-size:29px;font-weight:bold;letter-spacing:-1.4px;line-height:1}.mark span{color:#bc795d}.sub{font-size:9px;letter-spacing:.27em;color:#986f5a;font-weight:800;margin-top:6px}.header-right{display:flex;align-items:center;gap:13px}.header-right small{font-size:10px;letter-spacing:.15em;color:#807e70}.reset{border:1px solid #bfc2b3;border-radius:999px;background:var(--sand);color:var(--ink);height:40px;padding:0 16px;font-size:12px;font-weight:700}
+.game-shell{background:#d7d6c7;border:1px solid #bebeb0;border-radius:16px;overflow:hidden;box-shadow:0 14px 26px #342e2415;position:relative}canvas{display:block;width:100%;height:auto;aspect-ratio:960/650;touch-action:none}.intro{position:absolute;inset:0;background:#ede9dfd9;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .6s}.intro.show{opacity:1}.intro .over{color:#956b57;font-size:11px;font-weight:800;letter-spacing:.26em}.intro h1{font-family:Georgia,serif;font-size:clamp(28px,5vw,61px);color:var(--dark);letter-spacing:-.04em;margin:11px 0}.intro .under{font-size:13px;color:#807b70}.win{display:none;position:absolute;inset:0;background:#2e443dc4;align-items:center;justify-content:center;padding:18px;z-index:10}.win.visible{display:flex}.win-panel{width:min(490px,96%);padding:36px 24px;background:var(--sand);border:2px solid #d1ba90;border-radius:12px;text-align:center;box-shadow:0 20px 55px #28322c66}.win-panel small{font-weight:800;color:#ae7b60;letter-spacing:.2em}.win-panel h2{font-family:Georgia,serif;font-size:clamp(29px,4vw,44px);margin:13px 0;color:var(--ink)}.win-panel p{color:#7a8177;margin-bottom:22px;line-height:1.6}.win-panel button{border:0;color:white;background:var(--sage);font-weight:800;border-radius:8px;padding:12px 27px}
+.status{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 2px 14px}.status-left{font-size:13px;letter-spacing:.035em;font-weight:800}.status-left small{font-weight:500;color:var(--muted);margin-left:10px}.status-right{font-size:12px;color:var(--muted)}.echoes{display:inline-flex;gap:5px;margin-left:8px;vertical-align:middle}.echoes i{width:9px;height:9px;border:1px solid #aa9a89;border-radius:50%;display:inline-block}.echoes i.filled{background:var(--clay);border-color:var(--clay)}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-top:8px}.dpad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(2,56px);gap:6px}.move{border:1px solid #bec1b5;background:var(--sand);color:#41594d;border-radius:12px;box-shadow:0 3px 0 #c3c1b3;font-size:24px;font-weight:700}.move:active{background:#dce4d9;transform:translateY(2px)}.up{grid-column:2;grid-row:1}.left{grid-column:1;grid-row:2}.down{grid-column:2;grid-row:2}.right{grid-column:3;grid-row:2}.action-controls{display:flex;gap:10px;align-items:center}.secondary{background:var(--sand);border:1px solid #b9bdb0;border-radius:12px;padding:18px 22px;color:var(--ink);font-size:12px;font-weight:800;letter-spacing:.08em}.primary{background:#5e7c6d;color:#fff9f0;border:1px solid #4e665c;border-radius:12px;padding:18px 23px;font-weight:800;font-size:12px;letter-spacing:.08em;box-shadow:0 3px 0 #435c4f}.primary:active,.secondary:active{transform:translateY(2px)}.info{color:#8d887b;margin-top:16px;display:flex;justify-content:space-between;gap:12px;font-size:11px;line-height:1.7}.info strong{color:#586a5d}.note{font-family:Georgia,serif;font-style:italic;color:#817c70}#pulse{color:#ab735d;min-height:20px;font-weight:600}
+@media(max-width:610px){main{padding:14px 10px 24px}.mark{font-size:21px}.header-right small{display:none}.sub{font-size:7px}.game-shell{border-radius:10px}canvas{aspect-ratio:1/1.16;object-fit:fill}.status{margin:12px 4px}.status-left small{display:block;margin:3px 0}.status-right{font-size:10px}.dpad{grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,52px);gap:5px}.move{font-size:20px}.action-controls{gap:8px;flex-direction:column;align-items:stretch}.secondary,.primary{padding:16px 17px;font-size:11px}.info{font-size:10px}.info span:last-child{display:none}}
+</style>
+</head>
+<body><main>
+<header><div><div class="mark">the room remembers<span>.</span></div><div class="sub">CHALLENGE STUDY · NOT A MAIN-GAME RELEASE</div></div><div class="header-right"><small>THE HOUSE KEEPS ITS PROMISES</small><button id="reset" class="reset" aria-label="Clear all echoes and restart">Start over ↺</button></div></header>
+<div class="game-shell"><canvas id="game" aria-label="Top-down architectural memory puzzle room"></canvas>
+<div id="intro" class="intro show"><span class="over">AN UNFINISHED CHAPTER · ROOM 07</span><h1>THE INHERITANCE</h1><span class="under">What you leave behind may return.</span></div>
+<div id="win" class="win" role="dialog" aria-label="Puzzle complete"><div class="win-panel"><small>THE ROOM LET YOU LEAVE</small><h2>Nothing was forgotten.</h2><p id="results"></p><button id="again">Try from the beginning</button></div></div></div>
+<div class="status"><div class="status-left">07 <span style="color:#b6aa96">/</span> THE INHERITANCE <small id="attempt">Attempt 01</small></div><div class="status-right"><span id="time">Beat 00 / 32</span><span id="slots" class="echoes" aria-label="Memory slots"><i></i><i></i></span></div></div>
+<div class="controls"><div class="dpad" aria-label="Move one space"><button class="move up" data-act="up" aria-label="Move up">▲</button><button class="move left" data-act="left" aria-label="Move left">◀</button><button class="move down" data-act="down" aria-label="Move down">▼</button><button class="move right" data-act="right" aria-label="Move right">▶</button></div>
+<div class="action-controls"><button id="wait" class="secondary">WAIT · SPACE</button><button id="rewind" class="primary">REWIND ↶</button></div></div>
+<div class="info"><span><strong>Move</strong> with arrows / WASD · <strong>Wait</strong> with Space · <strong>Rewind</strong> with R<br>Each action advances one beat. The room replays your two most recent attempts.</span><span id="pulse" class="note" aria-live="polite"></span></div>
+</main><script>
+/* The Inheritance — deterministic, turn-based room simulation. No network, no training. */
+(function(root){
+'use strict';
+const W=11,H=7, LIMIT=32, START={x:1,y:3};
+const P={A:{x:2,y:1},B:{x:3,y:5},C:{x:7,y:2},EXIT:{x:10,y:3}};
+const ACTIONS={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0],wait:[0,0]};
+const eq=(a,b)=>!!a&&!!b&&a.x===b.x&&a.y===b.y;
+const pos=(tape,t)=> t<=tape.length? tape[t-1]||START:null; // frames 1-indexed, no immortal ghosts
+function fresh(){return {player:{...START},t:0,attempt:1,tapes:[],record:[],charged:false,window:0,solved:false,event:'',history:[],best:0};}
+function echoes(s,t=s.t){return s.tapes.map(tape=>pos(tape,t));}
+function onPad(ps,p){return ps.some(x=>eq(x,p));}
+function signals(s,t=s.t){const ep=echoes(s,t);return {a:onPad(ep,P.A),b:onPad(ep,P.B),c:eq(s.player,P.C),echoPositions:ep};}
+function allowed(s,next,a,b,gate1,gate2){
+ if(next.x<0||next.y<0||next.x>=W||next.y>=H)return false;
+ // Thick architectural walls at x=5 and x=9, each with exactly one gate at row 3.
+ if(next.x===5 && (next.y!==3||!gate1))return false;
+ if(next.x===9 && (next.y!==3||!gate2))return false;
+ // A closed gate cannot be crossed after it closes, even diagonally (only orthogonal moves).
+ if((s.player.x===5 && next.x===4)||(s.player.x===9&&next.x===8))return true;
+ return true;
+}
+function tick(s,act){
+ if(s.solved||s.t>=LIMIT||!ACTIONS[act])return s;
+ const old=echoes(s,s.t);
+ const nt=s.t+1;
+ const now=echoes(s,nt);
+ const a=onPad(now,P.A),b=onPad(now,P.B);
+ const departed=s.tapes.some((tape,i)=>eq(old[i],P.B)&&now[i]&&!eq(now[i],P.B));
+ const g1=a&&b;
+ let window=Math.max(0,s.window-1);
+ const signal=s.charged && a && departed;
+ if(signal)window=7;
+ const movement=ACTIONS[act];
+ const nx={x:s.player.x+movement[0],y:s.player.y+movement[1]};
+ const legal=allowed(s,nx,a,b,g1,window>0);
+ const player=legal?nx:{...s.player};
+ const charged=s.charged||(eq(player,P.C)&&g1);
+ // Allows departure pulse if the real player charges C on the same beat as the departure.
+ const finalWindow=(departed&&a&&charged)?7:window;
+ const solved=eq(player,P.EXIT)&&finalWindow>0;
+ const next={...s,player,t:nt,charged,window:finalWindow,solved,event:solved?'escaped':signal?'transfer':(charged&&!s.charged?'charged':(!legal&&act!=='wait'?'blocked':'')),record:s.record.concat([player]),best:Math.max(s.best,player.x)};
+ if(next.t===LIMIT&&!next.solved)next.event='tape full';
+ return next;
+}
+function rewind(s){
+ const tapes=s.tapes.map(tape=>tape.map(x=>({...x})));
+ if(s.record.length)tapes.push(s.record.map(x=>({...x})));
+ while(tapes.length>2)tapes.shift();
+ return {...fresh(),tapes,attempt:s.attempt+1,history:s.history.concat([{attempt:s.attempt,beats:s.t,furthest:s.best}]),event:'rewound'};
+}
+function reset(){return fresh();}
+const api={W,H,LIMIT,START,P,ACTIONS,eq,fresh,tick,rewind,reset,echoes,signals};
+if(typeof module!=='undefined'&&module.exports)module.exports=api;
+root.TRRInheritance=api;
+})(typeof window!=='undefined'?window:globalThis);
+
+</script><script>
+(function(){
+'use strict';
+const M=window.TRRInheritance, canvas=document.getElementById('game'),ctx=canvas.getContext('2d');
+const W=960,H=650,ox=83,oy=82,cs=72;
+let state=M.fresh(),introUntil=performance.now()+1600, lastKey=0;
+const colors={paper:'#e7e1d4',floor:'#f2ecdf',rim:'#788d7f',stone:'#b6b3a6',ink:'#395649',mute:'#ae9c8a',blue:'#74959a',brass:'#b98760',red:'#bd7864'};
+const el={attempt:document.getElementById('attempt'),time:document.getElementById('time'),slots:document.getElementById('slots'),pulse:document.getElementById('pulse'),win:document.getElementById('win'),results:document.getElementById('results'),intro:document.getElementById('intro')};
+function cell(x,y){return {x:ox+(x+.5)*cs,y:oy+(y+.5)*cs};}
+function rounded(x,y,w,h,r,col){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=col;ctx.fill();}
+function line(x1,y1,x2,y2,col,w=2){ctx.strokeStyle=col;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
+function circle(x,y,r,col){ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+function label(str,x,y,size,col,align='center',weight='600'){ctx.font=`${weight} ${size}px system-ui,sans-serif`;ctx.textAlign=align;ctx.fillStyle=col;ctx.fillText(str,x,y);}
+function playerShape(p,ghost=false,shade=0){if(!p)return;const q=cell(p.x,p.y);ctx.save();if(ghost)ctx.globalAlpha=.58;
+ circle(q.x,q.y+14,18,ghost?(shade?'#a4adb2':'#bba898'):'#554d3d22');
+ rounded(q.x-15,q.y-7,30,29,10,ghost?(shade?'#7c9a9f':'#aa887d'):'#b77356');
+ rounded(q.x-10,q.y,20,15,6,ghost?'#b2bfc1':'#557668');
+ rounded(q.x-9,q.y+18,8,14,3,ghost?'#839aa0':'#395148');rounded(q.x+1,q.y+18,8,14,3,ghost?'#839aa0':'#395148');
+ circle(q.x,q.y-13,13,ghost?'#ccd4cd':'#e1b492');ctx.fillStyle=ghost?'#81949a':'#4d4b3f';ctx.beginPath();ctx.arc(q.x,q.y-14,13,Math.PI*1.05,Math.PI*1.98);ctx.lineTo(q.x+12,q.y-14);ctx.fill();circle(q.x+5,q.y-10,1.4,'#605443');ctx.restore();}
+function pad(id,pt,active,kind){const p=cell(pt.x,pt.y),fill=active?'#a4c3be':'#dbd7c9';circle(p.x,p.y+4,30,'#554e3d19');circle(p.x,p.y,27,kind==='amber'?'#cda47a':'#7b9b9b');circle(p.x,p.y,20,fill);circle(p.x,p.y,11,active?'#6f978d':'#c2bbae');for(let i=0;i<4;i++){let a=i*Math.PI/2;circle(p.x+17*Math.cos(a),p.y+17*Math.sin(a),2,kind==='amber'?'#ac7857':'#689191');}}
+function railGate(x,open,tint){const bx=ox+x*cs;if(open){line(bx+2,oy+3*cs+7,bx+cs-4,oy+3*cs+7,tint,4);line(bx+2,oy+4*cs-7,bx+cs-4,oy+4*cs-7,tint,4);return;}rounded(bx+5,oy+3*cs+4,cs-10,cs-8,3,'#8b755d');for(let i=1;i<=3;i++)line(bx+10,oy+3*cs+i*17,bx+cs-11,oy+3*cs+i*17,'#c4ad91',2);}
+function draw(){const sx=canvas.getBoundingClientRect().width,sy=canvas.getBoundingClientRect().height,dpr=Math.min(2,devicePixelRatio||1);canvas.width=Math.max(1,Math.floor(sx*dpr));canvas.height=Math.max(1,Math.floor(sy*dpr));ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,sx,sy);
+ const mobile=sx<650;const scale=mobile?Math.max(sx/735,sy/700):Math.min(sx/W,sy/H);const cw=sx/scale,ch=sy/scale;
+ const cx=mobile?Math.max(0,Math.min(W-cw,cell(state.player.x,state.player.y).x-cw*.42)):Math.max(0,(W-cw)/2),cy=mobile?Math.max(0,Math.min(H-ch,cell(state.player.x,state.player.y).y-ch*.51)):Math.max(0,(H-ch)/2);
+ ctx.save();ctx.translate(-cx*scale,-cy*scale);ctx.scale(scale,scale);ctx.fillStyle=colors.paper;ctx.fillRect(0,0,W,H);
+ rounded(ox-22,oy-20,cs*11+44,cs*7+40,15,'#bcbeb0');rounded(ox-7,oy-7,cs*11+14,cs*7+14,8,'#6f897a');rounded(ox,oy,cs*11,cs*7,3,colors.floor);
+ for(let yy=0;yy<7;yy++)for(let xx=0;xx<11;xx++){const x=ox+xx*cs,y=oy+yy*cs;ctx.globalAlpha=.13;ctx.strokeStyle='#9f9a87';ctx.lineWidth=1;ctx.strokeRect(x,y,cs,cs);ctx.globalAlpha=1;}
+ // Decorative arches and architectural shadows.
+ for(const x of [142,357,581,791]){rounded(x,oy-9,66,17,3,'#ae987e');rounded(x+6,oy-6,54,9,2,'#e4d2b8');}
+ for(const x of [170,578,780]){rounded(x,oy+cs*7-2,31,7,1,'#b8a48a');}
+ // Fine inlaid wiring: signals are observable, not explained in words.
+ const A=cell(2,1),B=cell(3,5),C=cell(7,2),ga=cell(5,3),gb=cell(9,3);
+ const sig=M.signals(state);
+ ctx.save();ctx.setLineDash([7,7]);line(A.x,A.y,ga.x,ga.y,sig.a?'#739b96':'#c1b09b',2.8);line(B.x,B.y,ga.x,ga.y,sig.b?'#739b96':'#c1b09b',2.8);line(C.x,C.y,gb.x,gb.y,state.charged?'#bd855c':'#cbbba5',2.8);ctx.restore();
+ // The double walls are architectural partitions with their own entrances.
+ for(const x of [5,9])for(let y=0;y<7;y++)if(y!==3){const p=cell(x,y);rounded(p.x-cs/2+4,p.y-cs/2,cs-8,cs,2,x===5?'#6e8677':'#7c897c');line(p.x-cs/2+8,p.y-cs/2+12,p.x+cs/2-8,p.y-cs/2+12,'#adb2a0',1);}
+ railGate(5,sig.a&&sig.b,'#8eb5ac');railGate(9,state.window>0,'#cd9b71');
+ // Gate crest rings, deliberately symbolic rather than instructional text.
+ circle(ga.x,ga.y-48,8,sig.a&&sig.b?'#91b4a5':'#c3b4a1');circle(gb.x,gb.y-48,8,state.window?'#d4a278':'#c3b4a1');
+ pad('A',M.P.A,sig.a,'teal');pad('B',M.P.B,sig.b,'teal');pad('C',M.P.C,state.charged,'amber');
+ // Windows and an alcove in the main chamber.
+ rounded(ox+cs*.38,oy+cs*1.9,58,117,8,'#ded5c5');rounded(ox+cs*.51,oy+cs*2.07,38,85,3,'#e8ddcb');
+ const d=cell(10,3);rounded(d.x-31,d.y-44,61,94,6,'#5c4a3c44');rounded(d.x-29,d.y-48,57,88,5,'#6c5345');rounded(d.x-23,d.y-41,45,76,3,'#b48561');rounded(d.x-17,d.y-33,33,28,2,'#d1a076');rounded(d.x-17,d.y+1,33,27,2,'#c6956c');line(d.x-15,d.y-30,d.x+13,d.y-30,'#e5b68d',1);circle(d.x+13,d.y-2,3,'#efce96');rounded(d.x-30,d.y+38,61,5,1,'#d2b590');
+ // Echo history trails subtle enough to avoid spoiling switch sequencing.
+ for(let k=0;k<state.tapes.length;k++){ctx.save();ctx.globalAlpha=.24;for(let i=0;i<state.tapes[k].length;i+=3){let p=cell(state.tapes[k][i].x,state.tapes[k][i].y);circle(p.x,p.y+11,3,k?'#76989f':'#af8f77');}ctx.restore();}
+ for(let k=0;k<sig.echoPositions.length;k++)playerShape(sig.echoPositions[k],true,k);playerShape(state.player);
+ // Embossed small upper floor number, not a puzzle hint.
+ label('VII',ox+24,oy+31,14,'#b6ab99','left','700');
+ ctx.restore();}
+function refresh(){el.attempt.textContent='Attempt '+String(state.attempt).padStart(2,'0');el.time.textContent='Beat '+String(state.t).padStart(2,'0')+' / '+M.LIMIT;const dots=el.slots.querySelectorAll('i');dots.forEach((x,i)=>x.classList.toggle('filled',i<state.tapes.length));el.pulse.textContent=state.t>=M.LIMIT&&!state.solved?'The recording is full. Rewind.':(state.event==='blocked'?'':state.event==='charged'?'Something shifted.':state.event==='transfer'?'The room heard a departure.':'');if(state.solved){el.results.textContent=`${state.attempt} attempts · ${state.history.reduce((s,v)=>s+v.beats,0)+state.t} total beats`;el.win.classList.add('visible');}else el.win.classList.remove('visible');draw();}
+function input(a){if(performance.now()<introUntil)return;if(state.solved)return;state=M.tick(state,a);refresh();}
+function rewind(){if(performance.now()<introUntil)return;state=M.rewind(state);refresh();}
+for(const el of document.querySelectorAll('[data-act]'))el.addEventListener('click',()=>input(el.dataset.act));
+document.getElementById('wait').addEventListener('click',()=>input('wait'));document.getElementById('rewind').addEventListener('click',rewind);
+document.getElementById('reset').addEventListener('click',()=>{state=M.reset();refresh();});document.getElementById('again').addEventListener('click',()=>{state=M.reset();refresh();});
+const keys={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',' ':'wait'};
+window.addEventListener('keydown',e=>{if(e.key==='r'||e.key==='R'){if(!e.repeat)rewind();e.preventDefault();return;}const k=keys[e.key]||keys[e.key.toLowerCase?.()];if(k){if(!e.repeat)input(k);e.preventDefault();}});
+window.addEventListener('resize',draw);
+setTimeout(()=>{el.intro.classList.remove('show');introUntil=0;},1500);
+refresh();
+window.__TRR_TEST__={get:()=>JSON.parse(JSON.stringify(state)),step:a=>{state=M.tick(state,a);refresh();},rewind:()=>{state=M.rewind(state);refresh();},reset:()=>{state=M.reset();refresh();},load:st=>{state=st;refresh();}};
+})();
+
+</script></body></html>
