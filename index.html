@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#eae4d8">
-<title>The Room Remembers — Chapter I</title>
+<title>The Room Remembers — Chapter I (Five Rooms)</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600&display=swap');
 :root{--paper:#eae4d8;--ink:#3c514a;--mute:#7f877d;--outline:#c7bdae;--cream:#f6f0e5;--ochre:#bc7b5a;--deep:#425e56}
@@ -43,64 +43,74 @@ footer{font-size:12px;color:#8b8e83;line-height:1.6;margin:24px 3px 0;display:fl
   <canvas id="world" aria-label="Interactive puzzle room. Move with arrow keys or WASD and rewind to leave an echo."></canvas>
   <div class="intro" id="intro" role="status" aria-live="polite"><div class="intro-inner"><p>THE ROOM REMEMBERS</p><div class="intro-rule"></div><span id="introchapter">CHAPTER I · ROOM 01</span><h2 id="introname">AFTERIMAGE</h2><div class="intro-marks"><i></i><i></i><i></i></div></div></div>
   <div class="fallback" id="fallback">This preview cannot run the game. Open this file from a hosted website in your browser.</div>
-  <div id="roommenu" role="dialog" aria-label="Unlocked rooms"><div class="roompanel"><h3>The House Notices</h3><p>Rooms you have discovered</p><div id="roomchoices"></div><button class="roomclose" id="closemenu">Close</button></div></div>
+  <div id="roommenu" role="dialog" aria-label="Unlocked rooms"><div class="roompanel"><h3>The House Notices</h3><p>The rooms you have found so far</p><div id="roomchoices"></div><button class="roomclose" id="closemenu">Close</button></div></div>
   <div id="win" role="dialog" aria-label="Room completed" aria-modal="true"><div class="winpanel"><div class="small" id="winroom">ROOM 01 COMPLETE</div><h2 id="winname">Something stayed behind.</h2><p id="winsub">You found a way through the room.</p><button id="again">Next room</button></div></div>
 </div>
 <div class="underbar"><div class="roominfo"><span><span id="roomlabel">01 <span style="color:#b8ac9e">/</span> AFTERIMAGE</span></span><span class="rule"></span><span class="muted" id="attempts">Attempt 01</span></div><div class="rightinfo"><span class="muted" id="history">No echo</span><span id="statusdot" style="width:7px;height:7px;border-radius:50%;background:#b7b0a0"></span></div></div>
 <div class="controls"><div class="movebuttons" aria-label="Move character"><button class="arrow" data-key="up" aria-label="Move up"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5L3 17h18Z"/></svg></button><button class="arrow" data-key="left" aria-label="Move left"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M5 12l12-9v18Z"/></svg></button><button class="arrow" data-key="down" aria-label="Move down"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 19L3 7h18Z"/></svg></button><button class="arrow" data-key="right" aria-label="Move right"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 12L7 3v18Z"/></svg></button></div><div class="actionside"><button id="rewind" class="rewind"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7H2v-5M3 7a9 9 0 1 1-1 5"/></svg>REWIND</button><div class="miniinstr">WASD / arrow keys · R to rewind</div></div></div>
-<footer><span>Chapter I · The House Notices</span><span>The house learns a little each time.</span></footer>
+<footer><span>Chapter I · The House Notices</span><span>Five rooms. Every return leaves a trace.</span></footer>
 </main>
 <script>
 (()=>{'use strict';
 const canvas=document.getElementById('world'),ctx=canvas.getContext('2d'),win=document.getElementById('win');
 if(!ctx){document.body.classList.add('failed');return;}
 const W=960,H=600,FLOOR={x:72,y:92,w:816,h:438};
-const roomNames=['AFTERIMAGE','STRINGS ATTACHED','BAD HABITS'];
+const roomNames=['AFTERIMAGE','STRINGS ATTACHED','BAD HABITS','THE PERFECT EXIT','DÉJÀ WHO?'];
 const intro=document.getElementById('intro');
 const fresh=document.getElementById('fresh');
-let unlocked=1;try{unlocked=Math.max(1,Math.min(3,Number(localStorage.getItem('trr-v02-unlocked'))||1))}catch(_){}
+let unlocked=1;try{const newer=Number(localStorage.getItem('trr-v03-unlocked'))||0;const prior=Number(localStorage.getItem('trr-v02-unlocked'))||0;unlocked=newer?Math.max(1,Math.min(5,newer)):(prior>=3?4:Math.max(1,prior))}catch(_){}
 let roomIndex=unlocked-1,spawn={x:158,y:321},player={...spawn};
 let attempt=1,record=[],echo=[],echoPt=null,echoTime=0,clock=0,last=performance.now(),gateBlend=0,gateTimer=0,solved=false,soundOn=false,ac=null;
+let retainedEchoes=[],fakePulse=0;
 let recalledCorridor=null,crossedCorridor=null,sceneTime=0,footstepTimer=0,renderedOnce=false,scale=1,cameraX=0,cameraY=0,gateLatched=false;
 let revealSerial=0;
 const down={up:false,down:false,left:false,right:false};
 const status={attempts:document.getElementById('attempts'),history:document.getElementById('history'),dot:document.getElementById('statusdot'),label:document.getElementById('roomlabel')};
 const PA={x:412,y:409,r:27},PB={x:560,y:307,r:26},PC={x:388,y:199,r:27};
+const MEMORY_L={x:306,y:407,r:27},MEMORY_M={x:547,y:193,r:27},DECOY_DOOR={x:845,y:219};
 const obstacles=[[{x:286,y:166,w:48,h:48},{x:520,y:404,w:58,h:48}],
 [{x:288,y:366,w:65,h:49},{x:466,y:171,w:55,h:46}],
-[{x:282,y:291,w:66,h:60},{x:729,y:271,w:45,h:52}]];
+[{x:282,y:291,w:66,h:60},{x:729,y:271,w:45,h:52}],
+[{x:316,y:165,w:54,h:58},{x:515,y:406,w:60,h:50},{x:670,y:200,w:44,h:47}],
+[{x:282,y:303,w:48,h:48},{x:523,y:325,w:45,h:48},{x:739,y:400,w:47,h:50}]];
 function tone(freq=400,len=.07,volume=.018){if(!soundOn)return;try{ac ||= new (window.AudioContext||window.webkitAudioContext)();const osc=ac.createOscillator(),gain=ac.createGain();osc.type='sine';osc.frequency.setValueAtTime(freq,ac.currentTime);gain.gain.setValueAtTime(volume,ac.currentTime);gain.gain.exponentialRampToValueAtTime(.001,ac.currentTime+len);osc.connect(gain).connect(ac.destination);osc.start();osc.stop(ac.currentTime+len)}catch(_){}}
 function distance(a,b){return Math.hypot(a.x-b.x,a.y-b.y)}
 function pressed(plate){return distance(player,plate)<plate.r+6 || !!(echoPt&&distance(echoPt,plate)<plate.r+6)}
 function ownPressed(plate){return distance(player,plate)<plate.r+6}
 function echoPressed(plate){return !!(echoPt&&distance(echoPt,plate)<plate.r+6)}
-function refresh(){status.attempts.textContent='Attempt '+String(attempt).padStart(2,'0');status.label.innerHTML=String(roomIndex+1).padStart(2,'0')+' <span style="color:#b8ac9e">/</span> '+roomNames[roomIndex];status.history.textContent=roomIndex===2?(recalledCorridor?'The room remembers':'No memory'):(echo.length?'1 echo remembered':'No echo');status.dot.style.background=(echo.length||recalledCorridor)?'#c58a65':'#b7b0a0';}
+function refresh(){status.attempts.textContent='Attempt '+String(attempt).padStart(2,'0');status.label.innerHTML=String(roomIndex+1).padStart(2,'0')+' <span style="color:#b8ac9e">/</span> '+roomNames[roomIndex];status.history.textContent=roomIndex>=3?(retainedEchoes.length?retainedEchoes.length+' '+(retainedEchoes.length===1?'echo':'echoes')+' remembered':'No echo'):roomIndex===2?(recalledCorridor?'The room remembers':'No memory'):(echo.length?'1 echo remembered':'No echo');status.dot.style.background=(retainedEchoes.length||echo.length||recalledCorridor)?'#c58a65':'#b7b0a0';}
 function titleCard(){const serial=++revealSerial;intro.classList.add('show');document.getElementById('introchapter').textContent='CHAPTER I · ROOM '+String(roomIndex+1).padStart(2,'0');document.getElementById('introname').textContent=roomNames[roomIndex];setTimeout(()=>{if(serial===revealSerial)intro.classList.remove('show')},1500);}
-function resetMemory(showTitle=false){attempt=1;record=[];echo=[];echoPt=null;echoTime=0;clock=0;gateBlend=0;gateTimer=0;gateLatched=false;recalledCorridor=null;crossedCorridor=null;spawn={x:158,y:321};player={...spawn};solved=false;win.classList.remove('visible');Object.keys(down).forEach(k=>down[k]=false);record.push({t:0,x:spawn.x,y:spawn.y});refresh();if(showTitle)titleCard();tone(240,.09)}
-function enterRoom(idx){roomIndex=Math.max(0,Math.min(2,idx));document.getElementById('roommenu').classList.remove('visible');resetMemory(true);}
+function resetMemory(showTitle=false){attempt=1;record=[];echo=[];echoPt=null;echoTime=0;clock=0;gateBlend=0;gateTimer=0;gateLatched=false;recalledCorridor=null;crossedCorridor=null;retainedEchoes=[];fakePulse=0;spawn={x:158,y:321};player={...spawn};solved=false;win.classList.remove('visible');Object.keys(down).forEach(k=>down[k]=false);record.push({t:0,x:spawn.x,y:spawn.y});refresh();if(showTitle)titleCard();tone(240,.09)}
+function enterRoom(idx){roomIndex=Math.max(0,Math.min(4,idx));document.getElementById('roommenu').classList.remove('visible');resetMemory(true);}
 function rewind(){if(solved)return;
 if(roomIndex===2){const corridor=record.find(p=>p.x>630&&p.x<705&&((p.y>157&&p.y<247)||(p.y>364&&p.y<457)));if(corridor)recalledCorridor=corridor.y<305?'top':'bottom';}
-if(record.length>=3){echo=record.map(p=>({...p}));echoTime=0;echoPt={x:spawn.x,y:spawn.y};}
+if(roomIndex>=3){if(record.length>=3){retainedEchoes.push({frames:record.map(p=>({...p})),t:0,pos:{...spawn}});if(retainedEchoes.length>(roomIndex===3?1:2))retainedEchoes.shift();}echo=[];echoPt=null;}
+else if(record.length>=3){echo=record.map(p=>({...p}));echoTime=0;echoPt={x:spawn.x,y:spawn.y};}
 attempt++;record=[];clock=0;player={...spawn};gateBlend=0;gateTimer=0;gateLatched=false;crossedCorridor=null;record.push({t:0,x:spawn.x,y:spawn.y});refresh();tone(280,.14)}
-function finish(){if(solved)return;solved=true;const next=roomIndex+2;if(next>unlocked){unlocked=Math.min(3,next);try{localStorage.setItem('trr-v02-unlocked',String(unlocked))}catch(_){}}
-document.getElementById('winroom').textContent='ROOM '+String(roomIndex+1).padStart(2,'0')+' COMPLETE';document.getElementById('winname').textContent=['Something stayed behind.','Some strings hold longer.','Old habits die here.'][roomIndex];document.getElementById('winsub').textContent=roomIndex<2?'The next room is listening.':'Chapter I continues in our next update.';document.getElementById('again').textContent=roomIndex<2?'Enter next room':'Play again';win.classList.add('visible');tone(620,.18);setTimeout(()=>tone(790,.2),100)}
+function finish(){if(solved)return;solved=true;const next=roomIndex+2;if(next>unlocked){unlocked=Math.min(5,next);try{localStorage.setItem('trr-v03-unlocked',String(unlocked))}catch(_){}}
+document.getElementById('winroom').textContent='ROOM '+String(roomIndex+1).padStart(2,'0')+' COMPLETE';document.getElementById('winname').textContent=['Something stayed behind.','Some strings hold longer.','Old habits die here.','Not every door is yours.','Now you remember them all.'][roomIndex];document.getElementById('winsub').textContent=roomIndex<4?'The next room is listening.':'Chapter I complete. The house has noticed you.';document.getElementById('again').textContent=roomIndex<4?'Enter next room':'Return to the beginning';win.classList.add('visible');tone(620,.18);setTimeout(()=>tone(790,.2),100)}
 function hitRect(x,y,r,ob){const nearestX=Math.max(ob.x,Math.min(x,ob.x+ob.w)),nearestY=Math.max(ob.y,Math.min(y,ob.y+ob.h));return Math.hypot(x-nearestX,y-nearestY)<r}
+function onEchoPlate(plate){return retainedEchoes.some(e=>e.pos&&distance(e.pos,plate)<plate.r+6)}
 function gateOpen(){if(roomIndex===0)return pressed(PA);if(roomIndex===1)return gateTimer>0;return true;}
 function canStand(x,y){const rad=13;if(x<FLOOR.x+rad+5||y<FLOOR.y+rad+5||x>FLOOR.x+FLOOR.w-rad-5||y>FLOOR.y+FLOOR.h-rad-5)return false;
 for(const o of obstacles[roomIndex])if(hitRect(x,y,rad,o))return false;
+if(roomIndex===3&&hitRect(x,y,rad,{x:383,y:301,w:322,h:20}))return false;
+if(roomIndex===4){for(const [wallX,active] of [[431,onEchoPlate(MEMORY_L)],[654,onEchoPlate(MEMORY_M)]]){if(x>wallX-rad&&x<wallX+30+rad){if(y<267+rad||y>355-rad||!active)return false;}}return true;}
 if(roomIndex<=1){if(x>620-rad&&x<646+rad){if(y<269+rad||y>351-rad)return false;if(!gateOpen())return false;}}
-else if(x>618-rad&&x<649+rad){const top=y>=170+rad&&y<=238-rad;const bottom=y>=381+rad&&y<=449-rad;if(!top&&!bottom)return false;if((top&&recalledCorridor==='top')||(bottom&&recalledCorridor==='bottom'))return false;}
+else if(roomIndex===2&&x>618-rad&&x<649+rad){const top=y>=170+rad&&y<=238-rad;const bottom=y>=381+rad&&y<=449-rad;if(!top&&!bottom)return false;if((top&&recalledCorridor==='top')||(bottom&&recalledCorridor==='bottom'))return false;}
 return true;}
-function updateEcho(dt){if(!echo.length)return;echoTime+=dt;if(echoTime<=echo[0].t){echoPt={x:echo[0].x,y:echo[0].y};return}if(echoTime>=echo[echo.length-1].t){echoPt={x:echo[echo.length-1].x,y:echo[echo.length-1].y};return}let l=0,r=echo.length-1;while(l+1<r){let m=(l+r)>>1;if(echo[m].t<=echoTime)l=m;else r=m}let a=echo[l],b=echo[r],f=(echoTime-a.t)/(b.t-a.t||1);echoPt={x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f};}
+function sampleEcho(frames,time){if(time<=frames[0].t)return {x:frames[0].x,y:frames[0].y};if(time>=frames[frames.length-1].t)return {x:frames[frames.length-1].x,y:frames[frames.length-1].y};let l=0,r=frames.length-1;while(l+1<r){const m=(l+r)>>1;if(frames[m].t<=time)l=m;else r=m;}const a=frames[l],b=frames[r],f=(time-a.t)/(b.t-a.t||1);return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f};}
+function updateEcho(dt){if(roomIndex>=3){for(const e of retainedEchoes){e.t+=dt;e.pos=sampleEcho(e.frames,e.t);}return;}if(!echo.length)return;echoTime+=dt;if(echoTime<=echo[0].t){echoPt={x:echo[0].x,y:echo[0].y};return}if(echoTime>=echo[echo.length-1].t){echoPt={x:echo[echo.length-1].x,y:echo[echo.length-1].y};return}let l=0,r=echo.length-1;while(l+1<r){let m=(l+r)>>1;if(echo[m].t<=echoTime)l=m;else r=m}let a=echo[l],b=echo[r],f=(echoTime-a.t)/(b.t-a.t||1);echoPt={x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f};}
 function update(dt){sceneTime+=dt;if(solved||intro.classList.contains('show')||document.getElementById('roommenu').classList.contains('visible'))return;
-clock+=dt;updateEcho(dt);
+clock+=dt;updateEcho(dt);fakePulse=Math.max(0,fakePulse-dt*2.5);
 if(roomIndex===1){if((ownPressed(PB)&&echoPressed(PC))||(echoPressed(PB)&&ownPressed(PC))){gateTimer=3.9;gateLatched=true;}else gateTimer=Math.max(0,gateTimer-dt);}
 let dx=(down.right?1:0)-(down.left?1:0),dy=(down.down?1:0)-(down.up?1:0),d=Math.hypot(dx,dy);
 if(d){dx/=d;dy/=d;const delta=205*dt;if(canStand(player.x+dx*delta,player.y))player.x+=dx*delta;if(canStand(player.x,player.y+dy*delta))player.y+=dy*delta;footstepTimer+=dt;if(footstepTimer>.3){tone(100,.02,.006);footstepTimer=0;}}
 if(roomIndex===2&&player.x>651){if(player.y>170&&player.y<238)crossedCorridor='top';if(player.y>381&&player.y<449)crossedCorridor='bottom';}
 if(record.length===0||clock-record[record.length-1].t>.045){if(record.length<1800)record.push({t:clock,x:player.x,y:player.y});}
 let target=roomIndex===0?(pressed(PA)?1:0):roomIndex===1?(gateTimer>0?1:0):1;gateBlend+=(target-gateBlend)*Math.min(1,dt*10);
-if(player.x>815&&player.y>271&&player.y<377){if(roomIndex!==2||(recalledCorridor&&crossedCorridor&&recalledCorridor!==crossedCorridor))finish();}}
+if(roomIndex===3){if(player.x>786&&player.y>150&&player.y<278){fakePulse=1;}if(player.x>810&&player.y>374&&player.y<474&&retainedEchoes.some(e=>e.pos&&distance(e.pos,DECOY_DOOR)<68))finish();}
+else if(player.x>815&&player.y>271&&player.y<377){if(roomIndex===4){if(onEchoPlate(MEMORY_L)&&onEchoPlate(MEMORY_M))finish();}else if(roomIndex!==2||(recalledCorridor&&crossedCorridor&&recalledCorridor!==crossedCorridor))finish();}}
 function rndRect(x,y,w,h,r,fill){ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fillStyle=fill;ctx.fill()}
 function line(x1,y1,x2,y2,color,width=1){ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.stroke()}
 function poly(points,color){ctx.beginPath();ctx.moveTo(...points[0]);for(let i=1;i<points.length;i++)ctx.lineTo(...points[i]);ctx.closePath();ctx.fillStyle=color;ctx.fill()}
@@ -112,8 +122,8 @@ for(const x of [188,464,730]){rndRect(x,84,84,11,3,'#907c68');rndRect(x+5,82,74,
 }
 function planter(o){rndRect(o.x+6,o.y+11,o.w,o.h,8,'#685b4933');rndRect(o.x,o.y,o.w,o.h,7,'#b99b7e');rndRect(o.x+6,o.y+6,o.w-12,o.h-12,6,'#7d8571');circle(o.x+o.w*.35,o.y+o.h*.4,13,'#a1a990');circle(o.x+o.w*.65,o.y+o.h*.5,15,'#88967c');circle(o.x+o.w*.5,o.y+o.h*.6,13,'#6d8774')}
 function drawPlate(p,active){circle(p.x,p.y+4,41,'#00000013');circle(p.x,p.y,37,active?'#8a9c83':'#c8bcb0');circle(p.x,p.y,30,active?'#b1c8a8':'#ddd3c3');circle(p.x,p.y,23,active?'#d8e5d0':'#e8dfd0');ctx.strokeStyle=active?'#6c8c77':'#b19f8e';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,15,0,Math.PI*2);ctx.stroke();for(let i=0;i<4;i++){let a=i*Math.PI/2;circle(p.x+17*Math.cos(a),p.y+17*Math.sin(a),3,active?'#86a28e':'#b19f8e')}}
-function drawDoor(locked=false){rndRect(817,270,71,119,7,'rgba(48,39,29,.18)');rndRect(821,267,62,114,5,'#725747');rndRect(828,276,49,103,3,'#b68a63');rndRect(834,281,37,91,1,'#7e5b45');rndRect(838,285,29,37,1,'#c69a71');rndRect(838,328,29,37,1,'#bd9069');line(840,288,865,288,'#e6b68b',1);line(840,332,865,332,'#e4b48c',1);circle(861,324,3,locked?'#867a6a':'#e6c78c');if(locked){rndRect(852,333,16,13,2,'#8c7b68');circle(860,340,2,'#e6d2a9')}rndRect(820,379,65,5,2,'#d5b28a')}
-function drawBarriers(){if(roomIndex<2){rndRect(619,96,29,171,3,'#77867b');rndRect(619,353,29,177,3,'#77867b');rndRect(613,259,41,14,2,'#586c62');rndRect(613,347,41,13,2,'#586c62');for(let y=111;y<247;y+=30)line(623,y,644,y,'#9dac9d',1.5);for(let y=376;y<517;y+=31)line(623,y,644,y,'#9dac9d',1.5);
+function drawDoor(locked=false,x=817,y=270){ctx.save();ctx.translate(x-817,y-270);rndRect(817,270,71,119,7,'rgba(48,39,29,.18)');rndRect(821,267,62,114,5,'#725747');rndRect(828,276,49,103,3,'#b68a63');rndRect(834,281,37,91,1,'#7e5b45');rndRect(838,285,29,37,1,'#c69a71');rndRect(838,328,29,37,1,'#bd9069');line(840,288,865,288,'#e6b68b',1);line(840,332,865,332,'#e4b48c',1);circle(861,324,3,locked?'#867a6a':'#e6c78c');if(locked){rndRect(852,333,16,13,2,'#8c7b68');circle(860,340,2,'#e6d2a9')}rndRect(820,379,65,5,2,'#d5b28a');ctx.restore()}
+function drawBarriers(){if(roomIndex===3){rndRect(380,301,326,20,3,'#78887d');line(390,303,697,303,'#b7b9a8',3);return;}if(roomIndex===4){for(const [wx,open] of [[431,onEchoPlate(MEMORY_L)],[654,onEchoPlate(MEMORY_M)]]){rndRect(wx,98,30,169,2,'#708278');rndRect(wx,355,30,175,2,'#708278');rndRect(wx-6,260,42,13,2,'#536960');rndRect(wx-6,348,42,13,2,'#536960');if(!open){rndRect(wx+6,273,18,75,2,'#906c56');for(let k=281;k<347;k+=13)line(wx+7,k,wx+23,k,'#d7b99a',2);}else{line(wx+4,277,wx+4,345,'#a5ba98',3);}}return;}if(roomIndex<2){rndRect(619,96,29,171,3,'#77867b');rndRect(619,353,29,177,3,'#77867b');rndRect(613,259,41,14,2,'#586c62');rndRect(613,347,41,13,2,'#586c62');for(let y=111;y<247;y+=30)line(623,y,644,y,'#9dac9d',1.5);for(let y=376;y<517;y+=31)line(623,y,644,y,'#9dac9d',1.5);
 if(gateBlend<.995){ctx.save();ctx.globalAlpha=Math.max(0,1-gateBlend);rndRect(625,271,17,77,1,'#78644e');for(let y=280;y<342;y+=14)line(626,y,640,y,'#d3b08b',2);ctx.restore()}
 if(gateBlend>.05){ctx.save();ctx.globalAlpha=gateBlend*.45;line(621,276,621,346,'#8caa96',5);ctx.restore()}}
 else{for(const [start,end] of [[96,169],[239,381],[449,530]]){rndRect(618,start,31,end-start,3,'#77867b');}for(const [name,y] of [['top',170],['bottom',381]]){rndRect(613,y-9,41,13,2,'#586c62');rndRect(613,y+68,41,13,2,'#586c62');if(recalledCorridor===name){rndRect(624,y,19,68,2,'#97725e');for(let m=y+10;m<y+67;m+=13)line(625,m,642,m,'#d6bb99',2);}}
@@ -134,21 +144,37 @@ if(roomIndex===2){
 for(const [name,y] of [['top',199],['bottom',415]]){line(410,y,588,y,'#c6b8a5',3);circle(416,y,5,'#c6b8a5');if(recalledCorridor===name){for(let x=545;x<601;x+=18)circle(x,y+9,5,'rgba(173,123,98,.35)');}}
 // An unlit door remains physically real but refuses the first visit.
 }
+if(roomIndex===3){
+ // Two exits share the same craftsmanship; one is a convincing distraction.
+ ctx.save();ctx.globalAlpha=.24;line(718,300,798,300,'#a58c72',3);ctx.restore();
+ drawDoor(false,817,165);
+ if(fakePulse>0){circle(851,224,16+fakePulse*22,'rgba(181,128,88,'+(fakePulse*.18)+')');}
+ const decoyOccupied=retainedEchoes.some(e=>e.pos&&distance(e.pos,DECOY_DOOR)<68);
+ if(decoyOccupied){drawDoor(false,817,366);line(784,430,805,430,'#b39a7b',2);}
+ else{rndRect(820,367,59,113,4,'#d7cabb');ctx.save();ctx.globalAlpha=.38;ctx.strokeStyle='#ba9b7e';ctx.lineWidth=3;ctx.strokeRect(827,375,46,93);ctx.restore();}
+}
+if(roomIndex===4){
+ // Matching floor inlays and pairs of window arches quietly reveal the two memory stations.
+ for(const [p,i] of [[MEMORY_L,0],[MEMORY_M,1]]){drawPlate(p,onEchoPlate(p));circle(p.x+35,p.y-35,5,i===0?'#bd8868':'#8fa59e');}
+ ctx.save();ctx.globalAlpha=.7;line(MEMORY_L.x,MEMORY_L.y,373,MEMORY_L.y,'#c5ad88',2);line(373,MEMORY_L.y,373,322,'#c5ad88',2);line(MEMORY_M.x,MEMORY_M.y,611,MEMORY_M.y,'#c5ad88',2);line(611,MEMORY_M.y,611,323,'#c5ad88',2);ctx.restore();
+ drawDoor(!(onEchoPlate(MEMORY_L)&&onEchoPlate(MEMORY_M)));
+}
 if(echo.length){ctx.save();ctx.globalAlpha=.3;for(let i=0;i<echo.length;i+=Math.max(6,Math.floor(echo.length/45))){const p=echo[i];circle(p.x,p.y+11,4,'#9d8e7e')}ctx.restore()}
-drawDoor(roomIndex===2&&(!recalledCorridor||!crossedCorridor||crossedCorridor===recalledCorridor));}
-function character(pos,ghost=false){if(!pos)return;ctx.save();if(ghost)ctx.globalAlpha=.43;const x=pos.x,y=pos.y,step=(!ghost&&(down.left||down.right||down.up||down.down))?Math.sin(sceneTime*17)*2:0;circle(x,y+13,14,ghost?'#b08977':'#333a3423');rndRect(x-10,y+1+step,8,16,3,ghost?'#a3776b':'#334f49');rndRect(x+2,y+1-step,8,16,3,ghost?'#a3776b':'#334f49');rndRect(x-13,y-19+step,26,26,8,ghost?'#a87e70':'#c27e64');rndRect(x-9,y-15+step,18,19,7,ghost?'#bf9380':'#53766d');circle(x,y-23+step,11,ghost?'#ba9180':'#dfb28c');ctx.fillStyle=ghost?'#967b73':'#514d3f';ctx.beginPath();ctx.arc(x,y-25+step,11,Math.PI*1.08,Math.PI*1.96);ctx.lineTo(x+10,y-27+step);ctx.fill();circle(x+4,y-22+step,1.35,ghost?'#a68478':'#594739');ctx.restore()}
+if(roomIndex<=2)drawDoor(roomIndex===2&&(!recalledCorridor||!crossedCorridor||crossedCorridor===recalledCorridor));}
+
+function character(pos,ghost=false,shade=0){if(!pos)return;ctx.save();if(ghost){ctx.globalAlpha=.45;if(shade===1)ctx.filter='hue-rotate(135deg) saturate(.8)';circle(pos.x,pos.y+2,21,shade===1?'#7f9d9e33':'#bf886d33');}const x=pos.x,y=pos.y,step=(!ghost&&(down.left||down.right||down.up||down.down))?Math.sin(sceneTime*17)*2:0;circle(x,y+13,14,ghost?'#b08977':'#333a3423');rndRect(x-10,y+1+step,8,16,3,ghost?'#a3776b':'#334f49');rndRect(x+2,y+1-step,8,16,3,ghost?'#a3776b':'#334f49');rndRect(x-13,y-19+step,26,26,8,ghost?'#a87e70':'#c27e64');rndRect(x-9,y-15+step,18,19,7,ghost?'#bf9380':'#53766d');circle(x,y-23+step,11,ghost?'#ba9180':'#dfb28c');ctx.fillStyle=ghost?'#967b73':'#514d3f';ctx.beginPath();ctx.arc(x,y-25+step,11,Math.PI*1.08,Math.PI*1.96);ctx.lineTo(x+10,y-27+step);ctx.fill();circle(x+4,y-22+step,1.35,ghost?'#a68478':'#594739');ctx.restore()}
 function draw(){let cssWidth=canvas.getBoundingClientRect().width||960,cssHeight=canvas.getBoundingClientRect().height||540;const dpr=Math.min(2,window.devicePixelRatio||1);let wp=Math.round(cssWidth*dpr),hp=Math.round(cssHeight*dpr);if(canvas.width!==wp||canvas.height!==hp){canvas.width=wp;canvas.height=hp}ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,cssWidth,cssHeight);
-const base=Math.min(cssWidth/W,cssHeight/H),mobile=cssWidth<620;scale=mobile?Math.max(base,cssWidth/675):base;let viewW=cssWidth/scale,viewH=cssHeight/scale;cameraX=viewW>=W?(W-viewW)/2:Math.max(0,Math.min(W-viewW,player.x-viewW*.43));cameraY=viewH>=H?(H-viewH)/2:Math.max(0,Math.min(H-viewH,player.y-viewH*.55));ctx.save();ctx.translate(-cameraX*scale,-cameraY*scale);ctx.scale(scale,scale);room();if(echoPt)character(echoPt,true);character(player);ctx.restore();if(!renderedOnce){renderedOnce=true;document.getElementById('fallback').remove()}}
+const base=Math.min(cssWidth/W,cssHeight/H),mobile=cssWidth<620;scale=mobile?Math.max(base,cssWidth/675):base;let viewW=cssWidth/scale,viewH=cssHeight/scale;cameraX=viewW>=W?(W-viewW)/2:Math.max(0,Math.min(W-viewW,player.x-viewW*.43));cameraY=viewH>=H?(H-viewH)/2:Math.max(0,Math.min(H-viewH,player.y-viewH*.55));ctx.save();ctx.translate(-cameraX*scale,-cameraY*scale);ctx.scale(scale,scale);room();if(roomIndex>=3){retainedEchoes.forEach((e,i)=>{if(e.pos)character(e.pos,true,i);});}else if(echoPt)character(echoPt,true);character(player);ctx.restore();if(!renderedOnce){renderedOnce=true;document.getElementById('fallback').remove()}}
 function loop(now){const dt=Math.min((now-last)/1000,.04);last=now;update(dt);draw();requestAnimationFrame(loop)}
 const keymap={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'};
 window.addEventListener('keydown',e=>{const k=keymap[e.key];if(k){down[k]=true;e.preventDefault()}if((e.key==='r'||e.key==='R')&&!e.repeat){rewind();e.preventDefault()}if(e.key==='Escape')document.getElementById('roommenu').classList.remove('visible')});
 window.addEventListener('keyup',e=>{const k=keymap[e.key];if(k){down[k]=false;e.preventDefault()}});window.addEventListener('blur',()=>Object.keys(down).forEach(k=>down[k]=false));
 for(const el of document.querySelectorAll('.arrow')){let direction=el.dataset.key;function release(e){down[direction]=false;el.classList.remove('pressed');if(e&&el.hasPointerCapture?.(e.pointerId))el.releasePointerCapture(e.pointerId)}el.addEventListener('pointerdown',e=>{e.preventDefault();try{el.setPointerCapture(e.pointerId)}catch(_){}down[direction]=true;el.classList.add('pressed')});el.addEventListener('pointerup',release);el.addEventListener('pointercancel',release);el.addEventListener('lostpointercapture',release)}
-document.getElementById('rewind').addEventListener('click',rewind);fresh.addEventListener('click',()=>resetMemory());document.getElementById('again').addEventListener('click',()=>roomIndex<2?enterRoom(roomIndex+1):enterRoom(0));document.getElementById('sound').addEventListener('click',()=>{soundOn=!soundOn;document.getElementById('sound').style.background=soundOn?'#dce6d9':'#f5efe5';tone(500)});
+document.getElementById('rewind').addEventListener('click',rewind);fresh.addEventListener('click',()=>resetMemory());document.getElementById('again').addEventListener('click',()=>roomIndex<4?enterRoom(roomIndex+1):enterRoom(0));document.getElementById('sound').addEventListener('click',()=>{soundOn=!soundOn;document.getElementById('sound').style.background=soundOn?'#dce6d9':'#f5efe5';tone(500)});
 function openMenu(){const wrap=document.getElementById('roomchoices');wrap.replaceChildren();roomNames.forEach((name,i)=>{const b=document.createElement('button');b.className='roomchoice';b.disabled=i>=unlocked;b.innerHTML='<span>'+String(i+1).padStart(2,'0')+' · '+name+'</span><small>'+(i<unlocked?'ENTER':'LOCKED')+'</small>';b.addEventListener('click',()=>enterRoom(i));wrap.appendChild(b)});document.getElementById('roommenu').classList.add('visible');Object.keys(down).forEach(k=>down[k]=false)}
 document.getElementById('rooms').addEventListener('click',openMenu);document.getElementById('closemenu').addEventListener('click',()=>document.getElementById('roommenu').classList.remove('visible'));
 // Diagnostics enable repeatable validation; they do not affect normal play.
-window.__TRR_DIAG__={getState:()=>({room:roomIndex+1,player:{...player},attempt,echoLength:echo.length,echoPosition:echoPt?{...echoPt}:null,gateBlend,gateTimer,recalledCorridor,crossedCorridor,solved,clock,recordLength:record.length,unlocked}),setPlayer:(x,y)=>{player.x=x;player.y=y},go:enterRoom,rewind,reset:resetMemory,step:update};
+window.__TRR_DIAG__={getState:()=>({room:roomIndex+1,player:{...player},attempt,echoLength:echo.length,echoPosition:echoPt?{...echoPt}:null,echoes:retainedEchoes.map(e=>({position:e.pos?{...e.pos}:null,frames:e.frames.length,time:e.t})),gateA:roomIndex===4?onEchoPlate(MEMORY_L):null,gateB:roomIndex===4?onEchoPlate(MEMORY_M):null,gateBlend,gateTimer,recalledCorridor,crossedCorridor,solved,clock,recordLength:record.length,unlocked}),setPlayer:(x,y)=>{player.x=x;player.y=y},go:enterRoom,rewind,reset:resetMemory,step:update,canStand};
 resetMemory(true);requestAnimationFrame(loop);
 })();
 </script>
