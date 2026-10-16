@@ -1,33 +1,35 @@
 # The Room Remembers
 
-**Chapter I — The House Notices · v0.2**
+**Chapter I — The House Notices (v0.3)**
 
-A top-down architectural puzzle game in which your previous attempts leave memories that change what the room allows you to do.
+A quiet, original architectural puzzle game for desktop browsers and mobile devices. Your previous attempts can leave echoes that interact with the environment.
 
-**Play:** https://sashank-810.github.io/the-room-remembers/
+## Play
 
-## Rooms
+https://sashank-810.github.io/the-room-remembers/
 
-- 01 — **AFTERIMAGE**: the original echo mechanic.
-- 02 — **STRINGS ATTACHED**: two related mechanisms and a fleeting opening.
-- 03 — **BAD HABITS**: the house remembers which route you trusted.
+- Move with **WASD** or the **arrow keys**, or use the touch controls.
+- Press **R** or **REWIND** to preserve a memory of your last attempt.
+- Use **ROOMS** to revisit unlocked rooms.
+- The circular reset button clears the current room and its remembered attempts.
+- The game intentionally does not display solutions.
 
-Room names introduce each scene cinematically; puzzle instructions are deliberately omitted. The **ROOMS** menu shows only unlocked rooms. Progress is saved locally in your browser.
+## Chapter I — Five rooms
 
-## Controls
+01. **AFTERIMAGE**
+02. **STRINGS ATTACHED**
+03. **BAD HABITS**
+04. **THE PERFECT EXIT**
+05. **DÉJÀ WHO?**
 
-- Desktop: WASD or arrow keys to move; **R** to rewind.
-- Mobile: on-screen directional buttons and **REWIND**.
-- Top-right restart clears the current room's attempt history; **ROOMS** changes to an unlocked room.
+This update introduces a deceptive-exit puzzle and multiple remembered echoes, while retaining the first three rooms.
 
-## Deploy
+**Progress migration:** Returning v0.2 players who had reached Room 03 can enter Room 04 without replaying the introduction. New players start with Room 01. Progress saves locally in your browser; clearing the site's storage resets progress.
 
-Static GitHub Pages from `main` and `/(root)`. Edit `index.html` to update the game. There is no build step and no Codex or Netlify dependency.
+## Development
 
-## Roadmap
+The prototype is self-contained in `index.html` (HTML, CSS, Canvas and vanilla JavaScript). GitHub Pages serves it directly from `main`; no build or Codex usage is required to publish it.
 
-- 04 — **THE PERFECT EXIT** (planned)
-- 05 — **DÉJÀ WHO?** (planned)
-- Later: optional offline-trained RL director selecting among handcrafted solvable variants; not implemented in this release.
+Puzzle behavior is deterministic and designer-authored in this release. It does **not** currently use reinforcement learning; offline-trained adaptive room behavior is a future experiment once the core puzzles have been thoroughly playtested.
 
-This is a small playable browser prototype, not yet a native mobile app.
+Preserve the quiet architectural aesthetic, accessible controls, and fair puzzle rules.
