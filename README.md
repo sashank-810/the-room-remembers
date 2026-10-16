@@ -1,35 +1,32 @@
 # The Room Remembers
 
-**Chapter I — The House Notices (v0.3)**
+A quiet, top-down architectural puzzle game about rooms that remember your previous attempts.
 
-A quiet, original architectural puzzle game for desktop browsers and mobile devices. Your previous attempts can leave echoes that interact with the environment.
+**Current version:** Chapter I — five introductory rooms + **UNFINISHED BUSINESS** (Room 06), an optional advanced challenge.
 
-## Play
+**Play:** https://sashank-810.github.io/the-room-remembers/
 
-https://sashank-810.github.io/the-room-remembers/
+## Controls
 
-- Move with **WASD** or the **arrow keys**, or use the touch controls.
-- Press **R** or **REWIND** to preserve a memory of your last attempt.
-- Use **ROOMS** to revisit unlocked rooms.
-- The circular reset button clears the current room and its remembered attempts.
-- The game intentionally does not display solutions.
+- Desktop: WASD or arrow keys to move; R to rewind.
+- Mobile: on-screen movement buttons and REWIND.
+- ROOMS opens the level selector for unlocked rooms.
+- Restart (top-right arrow) clears the current room's memory.
 
-## Chapter I — Five rooms
+## What's new in v0.4
 
-01. **AFTERIMAGE**
-02. **STRINGS ATTACHED**
-03. **BAD HABITS**
-04. **THE PERFECT EXIT**
-05. **DÉJÀ WHO?**
-
-This update introduces a deceptive-exit puzzle and multiple remembered echoes, while retaining the first three rooms.
-
-**Progress migration:** Returning v0.2 players who had reached Room 03 can enter Room 04 without replaying the introduction. New players start with Room 01. Progress saves locally in your browser; clearing the site's storage resets progress.
+- Room 06: **UNFINISHED BUSINESS**, featuring finite-duration echoes and interactions triggered by the *sequence* of events.
+- The first five rooms remain available and mechanically unchanged.
+- Progress is stored locally in the browser. Previous v0.3 save data is carried forward.
+- Room 06 reports the number of attempts and active play time on completion.
+- No text-based solution hints.
 
 ## Development
 
-The prototype is self-contained in `index.html` (HTML, CSS, Canvas and vanilla JavaScript). GitHub Pages serves it directly from `main`; no build or Codex usage is required to publish it.
+This is a static HTML + JavaScript prototype, hosted by GitHub Pages from the `main` branch. No Node build, external server, login or Codex subscription is required to play it.
 
-Puzzle behavior is deterministic and designer-authored in this release. It does **not** currently use reinforcement learning; offline-trained adaptive room behavior is a future experiment once the core puzzles have been thoroughly playtested.
+For new game mechanics, we prioritize fair discoverability, meaningful memory interactions, fast retries, and deterministic puzzle solutions. Reinforcement learning remains a future research direction, not part of this build.
 
-Preserve the quiet architectural aesthetic, accessible controls, and fair puzzle rules.
+## QA notes
+
+The browser prototype was tested in Chromium on desktop and an iPhone-sized viewport. Scripted tests cover the intended Room 06 solution, blocked shortcuts, and regression checks for Rooms 01–05. The actual difficulty needs validation by human playtesting.
