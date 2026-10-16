@@ -100,7 +100,7 @@ function gateOpen(){if(roomIndex===0)return pressed(PA);if(roomIndex===1)return 
 function canStand(x,y){const rad=13;if(x<FLOOR.x+rad+5||y<FLOOR.y+rad+5||x>FLOOR.x+FLOOR.w-rad-5||y>FLOOR.y+FLOOR.h-rad-5)return false;
 for(const o of obstacles[roomIndex])if(hitRect(x,y,rad,o))return false;
 if(roomIndex===3&&hitRect(x,y,rad,{x:383,y:301,w:322,h:20}))return false;
-if(roomIndex===4){for(const [wallX,active] of [[431,onEchoPlate(MEMORY_L)],[654,onEchoPlate(MEMORY_M)]]){if(x>wallX-rad&&x<wallX+30+rad){if(y<263+rad||y>355-rad||!active)return false;}}return true;}
+if(roomIndex===4){for(const [wallX,active] of [[431,onEchoPlate(MEMORY_L)],[654,onEchoPlate(MEMORY_M)]]){if(x>wallX-rad&&x<wallX+30+rad){if(y<267+rad||y>355-rad||!active)return false;}}return true;}
 if(roomIndex===5){for(const [wallX,active] of [[388,sixthFirst()],[650,sixthSecond()]]){if(x>wallX-rad&&x<wallX+28+rad){if(y<263+rad||y>355-rad||!active)return false;}}return true;}
 if(roomIndex<=1){if(x>620-rad&&x<646+rad){if(y<269+rad||y>351-rad)return false;if(!gateOpen())return false;}}
 else if(roomIndex===2&&x>618-rad&&x<649+rad){const top=y>=170+rad&&y<=238-rad;const bottom=y>=381+rad&&y<=449-rad;if(!top&&!bottom)return false;if((top&&recalledCorridor==='top')||(bottom&&recalledCorridor==='bottom'))return false;}
